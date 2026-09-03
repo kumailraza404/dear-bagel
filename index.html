@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dear Bagel — Loyalty Card</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%231F3D2E'/%3E%3Ccircle cx='50' cy='50' r='20' fill='none' stroke='%23DFA23C' stroke-width='10'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  :root{
+    --forest:#1F3D2E;
+    --forest-dark:#152A20;
+    --forest-tint:#28503C;
+    --cream:#F6F1E4;
+    --cream-2:#EFE7D3;
+    --paper:#FCFAF3;
+    --gold:#DFA23C;
+    --gold-dark:#B87F27;
+    --ink:#20241E;
+    --ink-soft:#5B6459;
+    --line:#DCD3BB;
+    --danger:#A6432F;
+    --good:#3C6B4E;
+    --radius:4px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:"Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:84px;
+  }
+  .wrap{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--cream);
+    position:relative;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+  @media (min-width:481px){
+    body{background:var(--cream-2);}
+  }
+
+  /* ---------- Header ---------- */
+  header.top{
+    background:var(--forest);
+    color:var(--cream);
+    padding:22px 20px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.top::after{
+    content:"";
+    position:absolute;
+    right:-30px; top:-40px;
+    width:140px; height:140px;
+    border-radius:50%;
+    border:14px solid rgba(223,162,60,0.16);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:42px;height:42px;border-radius:50%;
+    background:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+    box-shadow:inset 0 0 0 3px var(--forest-dark);
+  }
+  .brand-mark svg{width:22px;height:22px;}
+  .brand h1{
+    font-family:"Fraunces", serif;
+    font-weight:600;
+    font-size:26px;
+    line-height:1;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand p{
+    margin:4px 0 0;
+    font-size:12.5px;
+    color:#D7CFB0;
+    font-style:italic;
+    font-family:"Fraunces", serif;
+  }
+  header.top .tagline{
+    margin-top:16px;
+    font-size:14px;
+    color:#E7E1CB;
+    max-width:34ch;
+    line-height:1.45;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:var(--forest-dark);
+    display:flex;
+    max-width:480px;
+    margin:0 auto;
+    border-top:1px solid rgba(255,255,255,0.08);
+    z-index:40;
+  }
+  nav.tabs button{
+    flex:1;
+    background:none;
+    border:none;
+    color:#A9B6A9;
+    font-family:"Public Sans", sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    padding:11px 4px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    cursor:pointer;
+    letter-spacing:0.2px;
+    position:relative;
+  }
+  nav.tabs button svg{width:20px;height:20px;stroke:#A9B6A9;transition:stroke .15s;}
+  nav.tabs button.active{color:var(--gold);}
+  nav.tabs button.active svg{stroke:var(--gold);}
+  nav.tabs button.active::before{
+    content:"";
+    position:absolute;
+    top:0; left:22%; right:22%;
+    height:2px;
+    background:var(--gold);
+  }
+
+  /* ---------- Views ---------- */
+  main{padding:22px 20px 32px;}
+  .view{display:none;}
+  .view.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  h2.section-title{
+    font-family:"Fraunces", serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 4px;
+    color:var(--forest);
+  }
+  p.section-sub{
+    margin:0 0 22px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+
+  /* ---------- Form ---------- */
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    text-transform:none;
+    color:var(--forest);
+    margin-bottom:6px;
+    letter-spacing:0.1px;
+  }
+  .field input{
+    width:100%;
+    padding:12px 13px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--paper);
+    font-size:15px;
+    font-family:inherit;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus{
+    border-color:var(--forest);
+    box-shadow:0 0 0 3px rgba(31,61,46,0.12);
+  }
+  .field input.err{border-color:var(--danger);}
+  .field .errmsg{
+    display:none;
+    color:var(--danger);
+    font-size:12px;
+    margin-top:5px;
+    font-weight:600;
+  }
+  .field.has-err .errmsg{display:block;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:13px 18px;
+    border-radius:var(--radius);
+    border:none;
+    font-family:"Public Sans", sans-serif;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    letter-spacing:0.2px;
+    transition:transform .08s ease, filter .15s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--gold); color:var(--forest-dark);}
+  .btn-primary:hover{filter:brightness(1.05);}
+  .btn-outline{background:transparent; color:var(--forest); border:1.5px solid var(--forest);}
+  .btn-block-secondary{background:var(--forest); color:var(--cream);}
+
+  /* ---------- Card issued ---------- */
+  .card-issued{
+    display:none;
+    text-align:center;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:28px 22px 24px;
+    position:relative;
+  }
+  .card-issued.active{display:block; animation:fade .3s ease;}
+  .stamp-badge{
+    width:54px;height:54px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background:var(--forest);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 3px var(--gold);
+  }
+  .stamp-badge svg{width:26px;height:26px;stroke:var(--gold);}
+  .card-issued h3{
+    font-family:"Fraunces", serif;
+    font-size:20px;
+    margin:0 0 3px;
+    color:var(--forest);
+  }
+  .card-issued .id-line{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:18px;
+    letter-spacing:0.3px;
+  }
+  .qr-box{
+    display:inline-flex;
+    padding:14px;
+    background:#fff;
+    border-radius:8px;
+    border:1px solid var(--line);
+    margin-bottom:18px;
+  }
+  .qr-box canvas{display:block;}
+  .card-issued .hint{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin-bottom:20px;
+  }
+
+  /* ---------- Empty state ---------- */
+  .empty{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-soft);
+  }
+  .empty .glyph{
+    width:56px;height:56px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    border:2px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .empty .glyph svg{width:26px;height:26px;stroke:var(--ink-soft);}
+  .empty p{margin:0; font-size:13.5px; line-height:1.5; max-width:26ch; margin:0 auto;}
+
+  /* ---------- Staff scan ---------- */
+  .select-wrap{position:relative; margin-bottom:22px;}
+  select{
+    width:100%;
+    padding:12px 36px 12px 13px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--paper);
+    font-size:15px;
+    font-family:inherit;
+    color:var(--ink);
+    appearance:none;
+    outline:none;
+  }
+  select:focus{border-color:var(--forest); box-shadow:0 0 0 3px rgba(31,61,46,0.12);}
+  .select-wrap::after{
+    content:"";
+    position:absolute;
+    right:14px; top:50%;
+    width:9px; height:9px;
+    border-right:2px solid var(--forest);
+    border-bottom:2px solid var(--forest);
+    transform:translateY(-65%) rotate(45deg);
+    pointer-events:none;
+  }
+
+  .customer-panel{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 20px;
+  }
+  .customer-panel .who{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:4px;
+  }
+  .customer-panel .who h3{
+    font-family:"Fraunces", serif;
+    font-size:19px;
+    margin:0;
+    color:var(--forest);
+  }
+  .customer-panel .who span{font-size:12px; color:var(--ink-soft);}
+  .customer-panel .phone{font-size:13px; color:var(--ink-soft); margin-bottom:20px;}
+
+  .stamp-row{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    margin-bottom:14px;
+  }
+  .stamp-dot{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:2px solid var(--forest);
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+  }
+  .stamp-dot.filled{
+    background:var(--forest);
+  }
+  .stamp-dot.filled svg{width:16px;height:16px;stroke:var(--gold);}
+  .stamp-dot.next{border-style:dashed; border-color:var(--gold-dark);}
+
+  .progress-note{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:20px;
+  }
+  .progress-note b{color:var(--forest);}
+
+  /* ---------- Reward banner ---------- */
+  .reward-flash{
+    display:none;
+    background:var(--gold);
+    color:var(--forest-dark);
+    border-radius:8px;
+    padding:16px 16px;
+    text-align:center;
+    margin-bottom:18px;
+  }
+  .reward-flash.show{display:block; animation:pop .35s ease;}
+  @keyframes pop{0%{transform:scale(0.9); opacity:0;} 100%{transform:scale(1); opacity:1;}}
+  .reward-flash .big{font-family:"Fraunces", serif; font-size:19px; font-weight:700; margin-bottom:2px;}
+  .reward-flash .small{font-size:12.5px; font-weight:600;}
+
+  /* ---------- Dashboard ---------- */
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:26px;
+  }
+  .stat-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 8px;
+    text-align:center;
+  }
+  .stat-card .num{
+    font-family:"Fraunces", serif;
+    font-size:24px;
+    font-weight:600;
+    color:var(--forest);
+    line-height:1.1;
+  }
+  .stat-card .lbl{
+    font-size:10.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+    line-height:1.3;
+    font-weight:600;
+  }
+
+  .cust-list{display:flex; flex-direction:column; gap:10px;}
+  .cust-row{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .cust-row .info h4{
+    font-family:"Fraunces", serif;
+    font-weight:600;
+    font-size:15.5px;
+    margin:0 0 2px;
+    color:var(--ink);
+  }
+  .cust-row .info .ph{font-size:12px; color:var(--ink-soft);}
+  .cust-row .right{text-align:right; flex:none;}
+  .mini-stamps{font-size:11px; color:var(--forest); font-weight:700; margin-bottom:6px;}
+  .pill{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:20px;
+    letter-spacing:0.2px;
+  }
+  .pill.active{background:rgba(60,107,78,0.14); color:var(--good);}
+  .pill.near{background:rgba(223,162,60,0.22); color:var(--gold-dark);}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;
+    left:50%;
+    bottom:96px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--forest-dark);
+    color:var(--cream);
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:100;
+    max-width:88%;
+    text-align:center;
+    border-left:3px solid var(--gold);
+  }
+  #toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  .divider-note{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:22px 0 18px;
+    color:var(--ink-soft);
+    font-size:11px;
+  }
+  .divider-note::before,.divider-note::after{content:""; flex:1; height:1px; background:var(--line);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1F3D2E" stroke-width="2.5"/><circle cx="12" cy="12" r="3.2" fill="none" stroke="#1F3D2E" stroke-width="2.2"/></svg>
+      </div>
+      <div>
+        <h1>Dear Bagel</h1>
+        <p>est. Mannheim — a taste of NY</p>
+      </div>
+    </div>
+    <p class="tagline" id="headerTagline">Buy 8, your 9th bagel's on the house. This is your card — no paper, no losing it.</p>
+  </header>
+
+  <main>
+
+    <!-- ===================== SIGN UP ===================== -->
+    <section id="view-signup" class="view active">
+
+      <div id="signupForm">
+        <h2 class="section-title">Join the club</h2>
+        <p class="section-sub">A stamp every visit. Free bagel on the eighth. Sign up once, we remember the rest.</p>
+
+        <div class="field" id="f-name">
+          <label for="in-name">Full name</label>
+          <input id="in-name" type="text" placeholder="e.g. Stephanie Weiss" autocomplete="name">
+          <div class="errmsg">Please enter a name.</div>
+        </div>
+
+        <div class="field" id="f-phone">
+          <label for="in-phone">Phone number</label>
+          <input id="in-phone" type="tel" placeholder="e.g. 0176 1234 5678" autocomplete="tel">
+          <div class="errmsg">Please enter a phone number.</div>
+        </div>
+
+        <button class="btn btn-primary" id="btnSignup">Get my card</button>
+      </div>
+
+      <div class="card-issued" id="cardIssued">
+        <div class="stamp-badge">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 id="issuedName">Welcome!</h3>
+        <div class="id-line" id="issuedId">ID —</div>
+        <div class="qr-box"><canvas id="qrCanvas"></canvas></div>
+        <p class="hint">Show this code at the counter every visit. Staff will scan it and add your stamp — eight fills the card.</p>
+        <button class="btn btn-outline" id="btnSignupAnother">Sign up another customer</button>
+      </div>
+
+    </section>
+
+    <!-- ===================== STAFF SCAN ===================== -->
+    <section id="view-staff" class="view">
+      <h2 class="section-title">Staff scan</h2>
+      <p class="section-sub">Pick the customer who just presented their code, then add their stamp.</p>
+
+      <div id="staffHasCustomers">
+        <div class="select-wrap">
+          <select id="staffSelect"></select>
+        </div>
+
+        <div class="reward-flash" id="rewardFlash">
+          <div class="big">🥯 Reward earned!</div>
+          <div class="small">Card complete — free bagel on this visit. Counter reset to zero.</div>
+        </div>
+
+        <div class="customer-panel" id="customerPanel">
+          <div class="who">
+            <h3 id="panelName">—</h3>
+            <span id="panelSince">—</span>
+          </div>
+          <div class="phone" id="panelPhone">—</div>
+
+          <div class="stamp-row" id="stampRow"></div>
+          <div class="progress-note" id="progressNote">—</div>
+
+          <button class="btn btn-block-secondary" id="btnAddStamp">Add stamp</button>
+        </div>
+      </div>
+
+      <div class="empty" id="staffEmpty" style="display:none;">
+        <div class="glyph"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" stroke-width="2"/><rect x="13" y="4" width="7" height="7" stroke-width="2"/><rect x="4" y="13" width="7" height="7" stroke-width="2"/></svg></div>
+        <p>No customers yet. Sign someone up on the first tab, then come back here to add their stamp.</p>
+      </div>
+    </section>
+
+    <!-- ===================== OWNER DASHBOARD ===================== -->
+    <section id="view-owner" class="view">
+      <h2 class="section-title">Owner dashboard</h2>
+      <p class="section-sub">A live look at the club — who's in, who's close to a free bagel.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="num" id="statCustomers">0</div>
+          <div class="lbl">Customers</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statStamps">0</div>
+          <div class="lbl">Stamps given</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="statRewards">0</div>
+          <div class="lbl">Rewards redeemed</div>
+        </div>
+      </div>
+
+      <div class="divider-note">members</div>
+
+      <div class="cust-list" id="custList"></div>
+
+      <div class="empty" id="ownerEmpty" style="display:none;">
+        <div class="glyph"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <p>Nobody's signed up yet. New members will show up here the moment they join.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="signup">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Sign up
+    </button>
+    <button class="tab-btn" data-view="staff">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M8 4v16M4 8h4M4 16h4"/></svg>
+      Staff scan
+    </button>
+    <button class="tab-btn" data-view="owner">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+      Dashboard
+    </button>
+  </nav>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "dearBagelCustomers";
+  var STAMP_GOAL = 8;
+
+  /* ---------------- storage ---------------- */
+  function loadCustomers(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){
+      return [];
+    }
+  }
+  function saveCustomers(list){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+  var customers = loadCustomers();
+
+  function genId(){
+    var rand = (crypto && crypto.randomUUID) ? crypto.randomUUID().split("-")[0] : Math.random().toString(36).slice(2,10);
+    return "DB-" + rand.toUpperCase();
+  }
+
+  /* ---------------- toast ---------------- */
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function toast(msg){
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600);
+  }
+
+  /* ---------------- tabs ---------------- */
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  var views = {
+    signup: document.getElementById("view-signup"),
+    staff: document.getElementById("view-staff"),
+    owner: document.getElementById("view-owner")
+  };
+  function showView(name){
+    Object.keys(views).forEach(function(k){
+      views[k].classList.toggle("active", k === name);
+    });
+    tabBtns.forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-view") === name);
+    });
+    if(name === "staff") renderStaffView();
+    if(name === "owner") renderOwnerView();
+  }
+  tabBtns.forEach(function(b){
+    b.addEventListener("click", function(){ showView(b.getAttribute("data-view")); });
+  });
+
+  /* ================= SIGN UP ================= */
+  var inName = document.getElementById("in-name");
+  var inPhone = document.getElementById("in-phone");
+  var fieldName = document.getElementById("f-name");
+  var fieldPhone = document.getElementById("f-phone");
+  var signupFormBlock = document.getElementById("signupForm");
+  var cardIssued = document.getElementById("cardIssued");
+
+  function setFieldError(fieldEl, hasErr){
+    fieldEl.classList.toggle("has-err", hasErr);
+    var input = fieldEl.querySelector("input");
+    input.classList.toggle("err", hasErr);
+  }
+
+  document.getElementById("btnSignup").addEventListener("click", function(){
+    var name = inName.value.trim();
+    var phone = inPhone.value.trim();
+    var nameOk = name.length > 0;
+    var phoneOk = phone.length > 0;
+    setFieldError(fieldName, !nameOk);
+    setFieldError(fieldPhone, !phoneOk);
+    if(!nameOk || !phoneOk) return;
+
+    var customer = {
+      id: genId(),
+      name: name,
+      phone: phone,
+      stamps: 0,
+      rewardsRedeemed: 0,
+      lastVisit: Date.now()
+    };
+    customers.push(customer);
+    saveCustomers(customers);
+
+    document.getElementById("issuedName").textContent = "Welcome, " + name.split(" ")[0] + "!";
+    document.getElementById("issuedId").textContent = "Member ID " + customer.id;
+    drawQR(customer.id);
+
+    signupFormBlock.style.display = "none";
+    cardIssued.classList.add("active");
+
+    toast("Signed up — card ready for " + name);
+    populateStaffSelect();
+  });
+
+  document.getElementById("btnSignupAnother").addEventListener("click", function(){
+    inName.value = "";
+    inPhone.value = "";
+    setFieldError(fieldName, false);
+    setFieldError(fieldPhone, false);
+    cardIssued.classList.remove("active");
+    signupFormBlock.style.display = "block";
+  });
+
+  function drawQR(text){
+    var canvas = document.getElementById("qrCanvas");
+    if(window.QRCode && QRCode.toCanvas){
+      QRCode.toCanvas(canvas, text, { width: 180, margin: 1, color:{ dark:"#1F3D2E", light:"#FFFFFF" } }, function(err){
+        if(err) fallbackQR(canvas, text);
+      });
+    } else {
+      fallbackQR(canvas, text);
+    }
+  }
+  function fallbackQR(canvas, text){
+    var ctx = canvas.getContext("2d");
+    canvas.width = 180; canvas.height = 180;
+    ctx.fillStyle = "#fff"; ctx.fillRect(0,0,180,180);
+    ctx.fillStyle = "#1F3D2E";
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("Scan unavailable", 90, 84);
+    ctx.fillText(text, 90, 100);
+  }
+
+  /* ================= STAFF SCAN ================= */
+  var staffSelect = document.getElementById("staffSelect");
+  var staffHasCustomers = document.getElementById("staffHasCustomers");
+  var staffEmpty = document.getElementById("staffEmpty");
+  var rewardFlash = document.getElementById("rewardFlash");
+
+  function populateStaffSelect(){
+    var prevVal = staffSelect.value;
+    staffSelect.innerHTML = "";
+    customers.forEach(function(c){
+      var opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.name + " — " + c.phone;
+      staffSelect.appendChild(opt);
+    });
+    if(prevVal && customers.some(function(c){return c.id === prevVal;})){
+      staffSelect.value = prevVal;
+    }
+  }
+
+  function currentStaffCustomer(){
+    var id = staffSelect.value;
+    return customers.find(function(c){ return c.id === id; });
+  }
+
+  function renderStaffView(){
+    populateStaffSelect();
+    if(customers.length === 0){
+      staffHasCustomers.style.display = "none";
+      staffEmpty.style.display = "block";
+      return;
+    }
+    staffHasCustomers.style.display = "block";
+    staffEmpty.style.display = "none";
+    rewardFlash.classList.remove("show");
+    renderCustomerPanel();
+  }
+
+  staffSelect.addEventListener("change", function(){
+    rewardFlash.classList.remove("show");
+    renderCustomerPanel();
+  });
+
+  function timeAgo(ts){
+    if(!ts) return "no visits yet";
+    var diff = Date.now() - ts;
+    var mins = Math.floor(diff/60000);
+    if(mins < 1) return "just now";
+    if(mins < 60) return mins + "m ago";
+    var hrs = Math.floor(mins/60);
+    if(hrs < 24) return hrs + "h ago";
+    var days = Math.floor(hrs/24);
+    return days + "d ago";
+  }
+
+  function renderCustomerPanel(){
+    var c = currentStaffCustomer();
+    if(!c) return;
+    document.getElementById("panelName").textContent = c.name;
+    document.getElementById("panelSince").textContent = timeAgo(c.lastVisit);
+    document.getElementById("panelPhone").textContent = c.phone;
+
+    var row = document.getElementById("stampRow");
+    row.innerHTML = "";
+    for(var i=0;i<STAMP_GOAL;i++){
+      var dot = document.createElement("div");
+      dot.className = "stamp-dot";
+      if(i < c.stamps){
+        dot.classList.add("filled");
+        dot.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+      } else if(i === c.stamps){
+        dot.classList.add("next");
+      }
+      row.appendChild(dot);
+    }
+
+    var remaining = STAMP_GOAL - c.stamps;
+    document.getElementById("progressNote").innerHTML =
+      "<b>" + c.stamps + " / " + STAMP_GOAL + "</b> stamps — " +
+      (remaining === 1 ? "1 more for a free bagel" : remaining + " more for a free bagel");
+  }
+
+  document.getElementById("btnAddStamp").addEventListener("click", function(){
+    var c = currentStaffCustomer();
+    if(!c) return;
+    c.stamps += 1;
+    c.lastVisit = Date.now();
+
+    if(c.stamps >= STAMP_GOAL){
+      c.stamps = 0;
+      c.rewardsRedeemed += 1;
+      saveCustomers(customers);
+      rewardFlash.classList.add("show");
+      toast(c.name + " earned a free bagel! 🥯");
+    } else {
+      saveCustomers(customers);
+      rewardFlash.classList.remove("show");
+      toast("Stamp added for " + c.name);
+    }
+    renderCustomerPanel();
+  });
+
+  /* ================= OWNER DASHBOARD ================= */
+  var custList = document.getElementById("custList");
+  var ownerEmpty = document.getElementById("ownerEmpty");
+
+  function renderOwnerView(){
+    document.getElementById("statCustomers").textContent = customers.length;
+
+    var totalStamps = customers.reduce(function(sum,c){
+      return sum + c.stamps + (c.rewardsRedeemed * STAMP_GOAL);
+    }, 0);
+    var totalRewards = customers.reduce(function(sum,c){ return sum + c.rewardsRedeemed; }, 0);
+
+    document.getElementById("statStamps").textContent = totalStamps;
+    document.getElementById("statRewards").textContent = totalRewards;
+
+    if(customers.length === 0){
+      custList.innerHTML = "";
+      ownerEmpty.style.display = "block";
+      return;
+    }
+    ownerEmpty.style.display = "none";
+
+    var sorted = customers.slice().sort(function(a,b){
+      return (b.lastVisit||0) - (a.lastVisit||0);
+    });
+
+    custList.innerHTML = "";
+    sorted.forEach(function(c){
+      var row = document.createElement("div");
+      row.className = "cust-row";
+
+      var near = c.stamps === STAMP_GOAL - 1;
+      var pillClass = near ? "near" : "active";
+      var pillText = near ? "Near reward" : "Active";
+
+      row.innerHTML =
+        '<div class="info">' +
+          '<h4>' + escapeHtml(c.name) + '</h4>' +
+          '<div class="ph">' + escapeHtml(c.phone) + '</div>' +
+        '</div>' +
+        '<div class="right">' +
+          '<div class="mini-stamps">' + c.stamps + ' / ' + STAMP_GOAL + ' stamps</div>' +
+          '<span class="pill ' + pillClass + '">' + pillText + '</span>' +
+        '</div>';
+      custList.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(ch){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch];
+    });
+  }
+
+  /* ---------------- init ---------------- */
+  populateStaffSelect();
+})();
+</script>
+</body>
+</html>
